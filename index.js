@@ -16,6 +16,7 @@ function dnxRunner(dnxCommand, options) {
     restore: true,
     build: false,
     run: true,
+	loop: false,
     cwd: './'
   }, options);
 
@@ -33,12 +34,23 @@ function dnxRunner(dnxCommand, options) {
     commands.push('dnu build');
   }
 
-  if (options.run === true) {
-    if(isWin) {
-      commands.push('@powershell -NoProfile -ExecutionPolicy unrestricted -Command "for(;;) { Write-Output \"Starting...\"; dnx --watch ' + dnxCommand + ' }"');
-    } else {
-      commands.push("sh -c 'while true; do echo \"Starting...\"; dnx --watch " + dnxCommand + '; done\'')
-    }
+  if(options.loop === true) {
+	  if (options.run === true) {
+		if(isWin) {
+		  commands.push('@powershell -NoProfile -ExecutionPolicy unrestricted -Command "for(;;) { Write-Output \"Starting...\"; dnx --watch ' + dnxCommand + ' }"');
+		} else {
+		  commands.push("sh -c 'while true; do echo \"Starting...\"; dnx --watch " + dnxCommand + '; done\'')
+		}
+	}
+  }
+  else {
+	  if (options.run === true) {
+		if(isWin) {
+		  commands.push('@powershell -NoProfile -ExecutionPolicy unrestricted -Command "Write-Output \"Starting...\"; dnx ' + dnxCommand + '"');
+		} else {
+		  commands.push("sh -c 'do echo \"Starting...\"; dnx " + dnxCommand + ';')
+		}
+	}
   }
 
   return shell.task(commands, {
@@ -52,6 +64,7 @@ dnxRunner.build = function(cwd) {
     build: true,
     restore: false,
     run: false,
+	loop: false,
     cwd: cwd
   });
 };
@@ -61,6 +74,7 @@ dnxRunner.restore = function(cwd) {
     restore: true,
     build: false,
     run: false,
+	loop: false,
     cwd: cwd
   });
 };
@@ -70,6 +84,7 @@ dnxRunner.restoreBuild = function(cwd) {
     restore: true,
     build: true,
     run: false,
+	loop: false,
     cwd: cwd
   });
 };
